@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from .mann_kendall import mann_kendall_test, MKTestResult
 from .sens_slope import sens_slope, SenSlopeResult
 from .ols_hac import ols_trend_test, OLSResult
+from .position_shift import position_shift, PositionShiftResult
 
 
 @dataclass
@@ -174,6 +175,31 @@ class TrendDetector:
             ols_result=ols_result
         )
     
+    def detect_shift(
+        self, 
+        series: np.ndarray, 
+        win_S: int = 7, 
+        win_B: int = 7, 
+        gap: int = 0,
+        biz_threshold: float = 0.0
+    ) -> PositionShiftResult:
+        """
+        Wrapper for position shift detection (Hodges-Lehmann).
+        """
+        import pandas as pd
+        if not isinstance(series, pd.Series):
+            series = pd.Series(series)
+        
+        return position_shift(
+            series, 
+            win_S=win_S, 
+            win_B=win_B, 
+            gap=gap,
+            biz_threshold=biz_threshold,
+            ci_alpha=self.alpha, 
+            use_bootstrap_ci=True
+        )
+        
     def detect_batch(
         self,
         series_list: List[np.ndarray],
